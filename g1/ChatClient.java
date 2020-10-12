@@ -4,10 +4,10 @@ import java.util.*;
 
 public class ChatClient {
 
-    public static class ChatClientInput extends Thread {
+    public static class ChatClientOutput extends Thread {
         private Socket socket;
 
-        public ChatClientInput(Socket socket) throws IOException {
+        public ChatClientOutput(Socket socket) throws IOException {
             this.socket = socket;
         }
 
@@ -24,9 +24,7 @@ public class ChatClient {
                     if (inputLine.equals("stop"))
                         break;
                     else
-                        System.out.println(inputLine);
-
-                    socketOut.println(inputLine);
+                        socketOut.println(inputLine);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -34,10 +32,10 @@ public class ChatClient {
         }
     }
 
-    public static class ChatClientOutput extends Thread {
+    public static class ChatClientInput extends Thread {
         private Socket socket;
 
-        public ChatClientOutput(Socket socket) throws IOException {
+        public ChatClientInput(Socket socket) throws IOException {
             this.socket = socket;
         }
 
@@ -47,6 +45,7 @@ public class ChatClient {
                 String inputLine;
 
                 while ((inputLine = socketIn.readLine()) != null) 
+                    System.out.println("got a message");
                     System.out.println(inputLine);
 
             } catch (IOException e) {
@@ -59,8 +58,10 @@ public class ChatClient {
         int port = Integer.parseInt(args[0]);
         try {
             Socket socket = new Socket("127.0.0.1", port);
-            Thread t = new ChatClientInput(socket);
-            t.start();
+            Thread tIn = new ChatClientInput(socket);
+            Thread tOut = new ChatClientOutput(socket);
+            tIn.start();
+            tOut.start();
         } catch (IOException e) {
             e.printStackTrace();
         }
