@@ -1,5 +1,6 @@
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -8,17 +9,12 @@ import java.util.concurrent.locks.ReentrantLock;
 public class ChatServerConnectionReader extends Thread {
     private Socket socket;
     private ReentrantLock lock;
-    private PrintWriter socketPrinter;
-    private BufferedReader inputStream;
-    private ArrayList<PrintWriter> connections;
+    private ArrayList<Socket> connections;
 
-    public ChatServerConnectionReader(Socket socketIn, BufferedReader inputIn, ReentrantLock lockIn,
-            PrintWriter socketPrinterIn, ArrayList<PrintWriter> connectionsIn) {
+    public ChatServerConnectionReader(Socket socketIn, ReentrantLock lockIn, ArrayList<Socket> connections) {
         this.socket = socketIn;
         this.lock = lockIn;
-        this.socketPrinter = socketPrinterIn;
-        this.inputStream = inputIn;
-        this.connections = connectionsIn;
+        this.connections = connections;
     }
 
     String message;
@@ -26,13 +22,15 @@ public class ChatServerConnectionReader extends Thread {
     public void run() {
         try {
             System.out.println("Reader running");
-            while ((message = inputStream.readLine()) != null) {
-                System.out.println(message);
+            BufferedReader socketIn = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
+            while ((message = socketIn.readLine()) != null) {
                 this.lock.lock();
-                for (PrintWriter out : this.connections) {
-                    System.out.println("sending");
-                    out.println(message);
-                    out.flush();
+                for (Socket s : this.connections) {
+                    if(s!=this.socket){
+                        PrintWriter socketOut = new PrintWriter(s.getOutputStream());
+                        socketOut.println(message);
+                        socketOut.flush();
+                    }
                 }
                 this.lock.unlock();
             }
@@ -41,7 +39,7 @@ public class ChatServerConnectionReader extends Thread {
             e.printStackTrace();
         } finally {
             this.lock.lock();
-            this.connections.remove(this.socketPrinter);
+            this.connections.remove(this.socket);
             this.lock.unlock();
             try {
                 socket.close();
