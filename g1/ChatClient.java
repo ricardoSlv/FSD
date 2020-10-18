@@ -15,9 +15,7 @@ public class ChatClient {
             try {
                 PrintWriter socketOut = new PrintWriter(this.socket.getOutputStream(), true);
                 BufferedReader inputIn = new BufferedReader(new InputStreamReader(System.in));
-                String inputLine, outputLine = "";
-
-                socketOut.println(outputLine);
+                String inputLine;
 
                 while ((inputLine = inputIn.readLine()) != null) {
 
@@ -25,6 +23,7 @@ public class ChatClient {
                         break;
                     else
                         socketOut.println(inputLine);
+                        socketOut.flush();
                 }
             } catch (IOException e) {
                 e.printStackTrace();

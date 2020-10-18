@@ -32,6 +32,7 @@ public class ChatServerConnectionReader extends Thread {
                 for (PrintWriter out : this.connections) {
                     System.out.println("sending");
                     out.println(message);
+                    out.flush();
                 }
                 this.lock.unlock();
             }
