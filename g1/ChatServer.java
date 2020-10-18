@@ -17,8 +17,7 @@ public class ChatServer extends Thread{
     public void run() {
        while(true) {
           try {
-            System.out.println("Waiting for client on port " + 
-            serverSocket.getLocalPort() + "...");
+            System.out.println("Waiting for client on port " + serverSocket.getLocalPort() + "...");
             Socket socket = serverSocket.accept();
             System.out.println("Just connected to " + socket.getRemoteSocketAddress());
 
