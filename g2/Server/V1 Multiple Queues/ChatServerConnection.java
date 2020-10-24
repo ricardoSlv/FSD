@@ -39,10 +39,7 @@ public class ChatServerConnection extends Thread {
                         }
                     }
                     buf.clear();
-                    synchronized (writerAlert){
-                        writerAlert.signalAll();
-                        System.out.println("ACORDAAAAR");
-                    }
+                    writerAlert.signalAll();
                     this.lock.unlock();
                 }
             } catch (Exception e) {
