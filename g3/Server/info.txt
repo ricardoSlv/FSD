@@ -1,0 +1,2 @@
+//netstat -na ||grep 3000 
+// Thread.dumpStack()
