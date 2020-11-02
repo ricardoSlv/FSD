@@ -23,7 +23,6 @@ public class ChatBot {
                 while (true) {
                     socketOut.println(name + ": " + this.counter + " Sheep");
                     socketOut.flush();
-                    System.out.println("sent");
                     this.counter++;
                     sleep(interval);
                 }

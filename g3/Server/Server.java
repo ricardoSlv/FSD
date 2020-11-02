@@ -63,7 +63,29 @@ public class Server {
         serverContext.ssc.accept(serverContext, ach);
     };
 
-    public static final CompletionHandler<Integer, ClientContext> writeMsg = new CompletionHandler<Integer, ClientContext>() {
+    public static final CompletionHandler<Integer, ClientContext> writeHandler = new CompletionHandler<Integer, ClientContext>() {
+        @Override
+        public void completed(Integer integer, ClientContext c) {
+            if (integer == 0) {
+                try {
+                    c.sc.close();
+                    c.connectedClientList.remove(c.sc);
+                } catch (Exception e) {
+                    System.out.println("Socket close error");
+                }
+            } else {
+                System.out.println("Feito! " + integer);
+                c.buf.clear();
+            }
+        }
+
+        @Override
+        public void failed(Throwable throwable, ClientContext context) {
+            System.out.println("Write failed");
+        }
+    };
+
+    public static final CompletionHandler<Integer, ClientContext> readHandler = new CompletionHandler<Integer, ClientContext>() {
         @Override
         public void completed(Integer integer, ClientContext c) {
 
@@ -72,32 +94,23 @@ public class Server {
                     c.sc.close();
                     c.connectedClientList.remove(c.sc);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    System.out.println("Socket was closed i think");
                 }
             } else {
                 c.buf.flip();
-                //todo TRY CATCH aqui para ver a exceçao de 2 writes simultaneos no meso socket
+                // todo TRY CATCH aqui para ver a exceçao de 2 writes simultaneos no mesmo socket
+                try{
                 for (AsynchronousSocketChannel socketC : c.connectedClientList) {
-                    socketC.write(c.buf, c, new CompletionHandler<Integer, ClientContext>() {
-                        @Override
-                        public void completed(Integer integer, ClientContext context) {
-                            if (integer == 0) {
-                                try {
-                                    c.sc.close();
-                                    c.connectedClientList.remove(c.sc);
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-                            } else {
-                                System.out.println("Feito! " + integer);
-                                c.buf.clear();
-                            }
-                        }
-                        @Override
-                        public void failed(Throwable throwable, ClientContext context) {
-                            System.out.println(throwable.getCause());
-                        }
-                    });
+                    try {
+                        socketC.write(c.buf.duplicate(), c, writeHandler);
+                    } catch (Exception e) {
+                        System.out.println("Double write error");
+                    }
+                }}catch(Exception e){
+                    // Ocorrre quando o arraylist é modificado durante a iteração
+                    // "It happens due to array list is modified after creation of Iterator."
+                    System.out.println("Error iterating socket list");
+                    e.printStackTrace();
                 }
                 readMsgRec(c);
             }
@@ -105,12 +118,17 @@ public class Server {
 
         @Override
         public void failed(Throwable throwable, ClientContext c) {
-            System.out.println(throwable.getCause());
+            System.out.println("Read Failed");
+            // System.out.println(throwable.getCause());
         }
     };
 
     public static void readMsgRec(ClientContext c) {
-        c.sc.read(c.buf, c, writeMsg);
+        try{
+            c.sc.read(c.buf, c, readHandler);
+        }catch(Exception e){
+            System.out.println("Read couldnt start");
+        }
     }
 
     public static void main(String[] args) throws Exception {
