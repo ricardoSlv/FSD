@@ -72,12 +72,12 @@ public class Server {
                     }
                 }
                 msgList.add(buf.duplicate());
-                sendMessageRec(msgList, s);
+                sendMessageList(msgList, s);
             }
         }
     }
 
-    private static void sendMessageRec(ArrayList<ByteBuffer> msgList, FutureSocketChannel s) {
+    private static void sendMessageList(ArrayList<ByteBuffer> msgList, FutureSocketChannel s) {
 
         if (msgList.size() == 0) {
             synchronized (s) {
@@ -97,7 +97,7 @@ public class Server {
                 }
                 String str = new String(Arrays.copyOf(msg.array(), nw), StandardCharsets.UTF_8);
                 System.out.println("Wrote: " + str + "Size: " + nw + "\nDelayedMsgs: " + msgList.size());
-            }).thenRun(() -> sendMessageRec(msgList, s));
+            }).thenRun(() -> sendMessageList(msgList, s));
         }
     }
 
