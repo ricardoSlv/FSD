@@ -6,9 +6,9 @@ import io.atomix.utils.net.Address;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+// import java.util.concurrent.TimeUnit;
 
-public class LeaderProcess extends Thread {
+public class LeaderProcessAsync extends Thread {
 
     private int port;
     private int totalProcesses;
@@ -16,7 +16,7 @@ public class LeaderProcess extends Thread {
     private int leader = 0;
     private ArrayList<Integer> peersAtented = new ArrayList<>();
 
-    public LeaderProcess(int port, int minPort, int totalProcesses) {
+    public LeaderProcessAsync(int port, int minPort, int totalProcesses) {
         super();
         this.port = port;
         this.minPort = minPort;
@@ -40,14 +40,18 @@ public class LeaderProcess extends Thread {
             if (this.peersAtented.contains(peerPort) == false) {
                 this.peersAtented.add(peerPort);
                 this.leader = peerPort > this.leader ? peerPort : this.leader;
+                System.out.println("ProcessAsync" + this.port + " currently thinks the leader is " + this.leader);
             }
+            if (this.peersAtented.size() + 1 == totalProcesses)
+                System.out.println("ProcessAsync" + this.port + " knows the leader is " + this.leader);
+
         }, es);
 
         ms.start();
 
-        es.schedule(() -> {
-            System.out.println("Process" + this.port + " says the leader is " + this.leader);
-        }, 1, TimeUnit.SECONDS);
+        // es.schedule(() -> {
+        //     System.out.println("Process" + this.port + " says the leader is " + this.leader);
+        // }, 1, TimeUnit.SECONDS);
 
         for (int i = 0; i < this.totalProcesses; i++) {
             if (this.minPort + i != this.port) {
