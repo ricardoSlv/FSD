@@ -20,9 +20,7 @@ public class ChatPeer {
         String[] peers = {port,peer1,peer2};
 
         ScheduledExecutorService es = Executors.newScheduledThreadPool(1);
-        MessagingConfig mConfig = new MessagingConfig();
-        mConfig.setPort(Integer.parseInt(port));
-        NettyMessagingService ms = new NettyMessagingService("chatpeer", Address.from(port),mConfig); 
+        NettyMessagingService ms = new NettyMessagingService("chatpeer", Address.from(Integer.parseInt(port)),new MessagingConfig()); 
         
         try {
             Thread.sleep(100, 0);
@@ -45,7 +43,6 @@ public class ChatPeer {
                     "chatpeer", 
                     msg.getBytes()
                 )
-                //.thenRun(() -> {System.out.println("Mensagem enviada!");})
                 .exceptionally(t -> {
                     t.printStackTrace();
                     return null;
@@ -54,3 +51,5 @@ public class ChatPeer {
         }
     }
 }
+
+
