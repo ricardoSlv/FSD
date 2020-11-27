@@ -34,6 +34,8 @@ public class LeaderProcess extends Thread {
             e.printStackTrace();
         }
 
+        
+
         ms.registerHandler("leader", (adress, msg) -> {
             int peerPort = new BigInteger(msg).intValue();
 
